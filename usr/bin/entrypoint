@@ -1,0 +1,17 @@
+#!/bin/sh
+
+PHINX=true
+
+crond -b
+nginx
+php-fpm7 -F -R
+
+phinx > /dev/null || PHINX=false
+swagger > /dev/null || true
+
+if [ "$PHINX" = true ] ; then
+    phinx migrate
+    if [ "$APP_ENV" != "prod" ] ; then
+        phinx seed:run
+    fi
+fi
